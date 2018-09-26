@@ -7,7 +7,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <thread>
+
 using namespace std;
+
 class MySocket
 {
 public:
@@ -54,6 +57,25 @@ private:
     int m_socket;
 };
 
+void response(MySocket &mySocket)
+{
+    char str[] = "hello";
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_size = sizeof(client_addr);
+    int client_sock = accept(mySocket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
+
+    printf("%d\n", client_sock);
+
+    if (client_sock != 0)
+    {
+        printf("receive client request\n");
+    }
+            
+    write(client_sock, str, sizeof(str));
+
+    close(client_sock);
+}
+
 int main()
 {
 //    int server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -73,17 +95,40 @@ int main()
 //    socklen_t client_addr_size = sizeof(client_addr);
 //    int client_sock = accept(server_socket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
     
-    char str[] = "hello";
+    
     while(true)
     {
-    
-        struct sockaddr_in client_addr;
-        socklen_t client_addr_size = sizeof(client_addr);
-        int client_sock = accept(server_socket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
-    	
-        write(client_sock, str, sizeof(str));
+        response(server_socket);
 
-        close(client_sock);
+//thread is wrong, need more pratice 2018/09/26 23:54 elvis
+
+        // std::thread serverThreads[10];
+        // for (int i = 0; i < 10; ++i)
+        // {
+        //     serverThreads[i] = std::thread(response, server_socket);
+        // }
+
+        // for (int i = 0; i < 10; ++i)
+        // {
+        //     serverThreads[i].join();
+        // }
+
+
+        // char str[] = "hello";
+        // struct sockaddr_in client_addr;
+        // socklen_t client_addr_size = sizeof(client_addr);
+        // int client_sock = accept(server_socket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
+
+        // printf("%d\n", client_sock);
+
+        // if (client_sock != 0)
+        // {
+        //     printf("receive client request\n");
+        // }
+    	
+        // write(client_sock, str, sizeof(str));
+
+        // close(client_sock);
     }
 
 //    close(client_sock);
