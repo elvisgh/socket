@@ -9,6 +9,22 @@
 
 using namespace std;
 
+int connectServer(const char* serverAddr, const int& serverPort)
+{
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    // server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // server_addr.sin_port = htons(12333);
+    server_addr.sin_addr.s_addr = inet_addr(serverAddr);
+    server_addr.sin_port = htons(serverPort);
+    
+    int connectSignal = connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    return connectSignal;
+}
+
 void createClient()
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -18,7 +34,15 @@ void createClient()
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     server_addr.sin_port = htons(12333);
-    connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    int signal = connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
+    if (signal == 0)
+    {
+        printf("connect server sucessfully\n");
+    }
+
+    char request[] = "hello, this is client";
+    write(sock, request, sizeof(request));
     
     char buffer[40];
 //    while(true)
@@ -52,8 +76,8 @@ int main()
 
 //     close(sock);
 
-    std::thread clientThreads[1000];
-    int client_num = 1000;
+    std::thread clientThreads[1];
+    int client_num = 1;
 
     for (int i = 0; i < client_num; ++i)
     {

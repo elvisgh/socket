@@ -59,17 +59,21 @@ private:
 
 void response(MySocket &mySocket)
 {
-    char str[] = "hello";
+    char str[] = "hello, this is server";
     struct sockaddr_in client_addr;
     socklen_t client_addr_size = sizeof(client_addr);
     int client_sock = accept(mySocket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
 
     printf("%d\n", client_sock);
 
-    if (client_sock != 0)
+    if (client_sock != -1)
     {
         printf("receive client request\n");
     }
+
+    char request[40];
+    read(client_sock, request, sizeof(request)-1);
+    printf("message fron client: %s\n", request);
             
     write(client_sock, str, sizeof(str));
 
