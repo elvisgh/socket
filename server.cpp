@@ -15,9 +15,9 @@ class MySocket
 {
 public:
     MySocket(){};
-    MySocket(const string& addr, const int& port)
+    MySocket(const string& ip, const int& port)
     {
-        m_addr = addr;
+        m_ip = ip;
         m_port = port;
         init();
         listenSocket();
@@ -38,6 +38,29 @@ public:
         return m_socket;
     }
 
+    void response()
+    {
+        struct sockaddr_in client_addr;
+        socklen_t client_addr_size = sizeof(client_addr);
+        int client_sock = accept(m_socket, (struct sockaddr*)&client_addr, &client_addr_size);
+
+        printf("%d\t", client_sock);
+
+        if (client_sock != -1)
+        {
+            printf("receive client request\n");
+        }
+
+        char request[40];
+        read(client_sock, request, sizeof(request)-1);
+        printf("message fron client: %s\n", request);
+            
+        char str[] = "hello, this is server";
+        write(client_sock, str, sizeof(str));
+
+        close(client_sock);
+    }
+
 private:
     void init()
     {    
@@ -46,97 +69,40 @@ private:
         struct sockaddr_in socket_addr;
         memset(&socket_addr, 0, sizeof(socket_addr));
         socket_addr.sin_family = AF_INET;
-        socket_addr.sin_addr.s_addr = inet_addr(m_addr.data());
+        socket_addr.sin_addr.s_addr = inet_addr(m_ip.data());
         socket_addr.sin_port = htons(m_port);
         bind(m_socket, (struct sockaddr*)&socket_addr, sizeof(socket_addr));
     }
 
 private:
-    string m_addr;
+    string m_ip;
     int m_port;
     int m_socket;
 };
 
-void response(MySocket &mySocket)
-{
-    char str[] = "hello, this is server";
-    struct sockaddr_in client_addr;
-    socklen_t client_addr_size = sizeof(client_addr);
-    int client_sock = accept(mySocket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
-
-    printf("%d\n", client_sock);
-
-    if (client_sock != -1)
+int main()
+{  
+    MySocket server_socket("127.0.0.1", 12333); 
+    
+    // while(true)
     {
-        printf("receive client request\n");
+        std::thread serverThreads[2];
+        for (int i = 0; i < 2; ++i)
+        {
+            serverThreads[i] = std::thread(&MySocket::response, server_socket);
+        }
+
+        for (int i = 0; i < 2; ++i)
+        {
+            serverThreads[i].detach();
+        }
     }
 
-    char request[40];
-    read(client_sock, request, sizeof(request)-1);
-    printf("message fron client: %s\n", request);
-            
-    write(client_sock, str, sizeof(str));
-
-    close(client_sock);
-}
-
-int main()
-{
-//    int server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-//   
-//    struct sockaddr_in server_addr;
-//    memset(&server_addr, 0, sizeof(server_addr));
-//    server_addr.sin_family = AF_INET;
-//    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-//    server_addr.sin_port = htons(12333);
-//    bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr));
-//
-//    listen(server_socket, 20);
-    
-    MySocket server_socket = MySocket("127.0.0.1", 12333);
-
-//    struct sockaddr_in client_addr;
-//    socklen_t client_addr_size = sizeof(client_addr);
-//    int client_sock = accept(server_socket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
-    
-    
     while(true)
     {
-        response(server_socket);
-
-//thread is wrong, need more pratice 2018/09/26 23:54 elvis
-
-        // std::thread serverThreads[10];
-        // for (int i = 0; i < 10; ++i)
-        // {
-        //     serverThreads[i] = std::thread(response, server_socket);
-        // }
-
-        // for (int i = 0; i < 10; ++i)
-        // {
-        //     serverThreads[i].join();
-        // }
-
-
-        // char str[] = "hello";
-        // struct sockaddr_in client_addr;
-        // socklen_t client_addr_size = sizeof(client_addr);
-        // int client_sock = accept(server_socket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
-
-        // printf("%d\n", client_sock);
-
-        // if (client_sock != 0)
-        // {
-        //     printf("receive client request\n");
-        // }
-    	
-        // write(client_sock, str, sizeof(str));
-
-        // close(client_sock);
+        //keep server running
     }
 
-//    close(client_sock);
-//    close(server_socket);
     server_socket.closeSocket();
     return 0;
 }
