@@ -7,6 +7,8 @@
 
 #include <thread>
 
+#include "structure.h"
+
 using namespace std;
 
 class ClinetInterface
@@ -43,23 +45,13 @@ public:
 
     int writeMessage(const string& request)
     {
-        int result;
-        int k = 10;
-        while(k)
-        {
-            printf("write %d\n", k);
-            char *buffer = new char[request.length() + 1];
-            int i;
-            for (i = 0; i < request.length(); ++i)
-            {
-                buffer[i] = request[i];
-            }
-            buffer[i] = '\0';
-        
-            result = write(m_socket, buffer, request.length());
-            delete buffer;
-            --k;
-        }
+        int result = -1;
+
+		MessageBody writeMB;
+		writeMB.message = 55555;
+
+		result = write(m_socket, &writeMB, sizeof(writeMB));
+
         return result;
     }
 
@@ -69,7 +61,9 @@ public:
     	
         if (read(m_socket, buffer, sizeof(buffer)-1))
         {
-            printf("message fron server: %s\n", buffer);
+			MessageBody readMB;
+			memcpy(&readMB, buffer, sizeof(buffer));
+			printf("receive message from server : %d\n", readMB.message);
         }
         else
         {
