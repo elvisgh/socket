@@ -46,7 +46,7 @@ public:
         socklen_t client_addr_size = sizeof(client_addr);
         int client_sock = accept(m_socket, (struct sockaddr*)&client_addr, &client_addr_size);
 
-        printf("Listen client_sock %d\n", client_sock);
+		printf("client %d connect sucessfully, ip : %s port : %d\n", client_sock, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         if (client_sock != -1)
         {
@@ -79,23 +79,6 @@ private:
     int m_port;
     int m_socket;
 };
-
-void response(MySocket &mySocket)
-{
-    struct sockaddr_in client_addr;
-    socklen_t client_addr_size = sizeof(client_addr);
-    int client_sock = accept(mySocket.getSocket(), (struct sockaddr*)&client_addr, &client_addr_size);
-
-    printf("%d\n", client_sock);
-
-    if (client_sock != 0)
-    {
-        printf("receive client request\n");
-            
-	}
-    
-    close(client_sock);
-}
 
 int main()
 {  
