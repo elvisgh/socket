@@ -5,5 +5,7 @@ using namespace std;
 
 struct MessageBody
 {
-	int message;
+	char destIp[16];
+	int destPort;
+	char message[40];
 };

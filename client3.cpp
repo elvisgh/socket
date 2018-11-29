@@ -30,7 +30,7 @@ public:
     }
 
     int connectServer(const string& serverIP, const int& serverPort)
-    {  
+    {
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
@@ -46,26 +46,22 @@ public:
 
 		MessageBody writeMB;
 		strcpy(writeMB.destIp, "127.0.0.1");
-		writeMB.destPort = 12335;
-		strcpy(writeMB.message, "hello, i am 12334");
+		writeMB.destPort = 12334;
+		strcpy(writeMB.message, "hello, i am 12335");
 
-		printf("xxxxxxxxx%s %d\n", writeMB.destIp, writeMB.destPort);
-
-		char buffer[100];
-		memcpy(buffer, &writeMB, sizeof(writeMB));
-		result = write(m_socket, buffer, sizeof(buffer));
+		result = write(m_socket, &writeMB, sizeof(writeMB));
 
         return result;
     }
 
     void readMessage()
     {
-        char buffer[100];
+        char buffer[40];
     	
-        if (read(m_socket, buffer, sizeof(buffer)-1))
+        if (read(m_socket, buffer, sizeof(buffer)))
         {
 			MessageBody readMB;
-			memcpy(&readMB, buffer, sizeof(readMB));
+			memcpy(&readMB, buffer, sizeof(buffer));
 			printf("receive message from server : %s\n", readMB.message);
         }
         else
@@ -88,7 +84,7 @@ private:
 
 int main()
 {
-    ClinetInterface clientDemo("127.0.0.1", 12334);
+    ClinetInterface clientDemo("127.0.0.1", 12335);
 
    // std::thread clientThreads[1];
    // int client_num = 1;
@@ -107,24 +103,17 @@ int main()
    // std::thread clientThreads2 = thread(&ClinetInterface::readMessage, clientDemo);
    // clientThreads2.detach();
 
-    int signal = clientDemo.connectServer("127.0.0.1", 12333);
     while(true)
     {
         //keep client running
-    	if (signal == 0)
+    	int signal = clientDemo.connectServer("127.0.0.1", 12333);
+    	if (signal > 0)
     	{
         	printf("connect server sucessfully.\n");
-		//	clientDemo.readMessage();
+			clientDemo.readMessage();
 			clientDemo.writeMessage();
-		//	clientDemo.readMessage();
-			sleep(5);
+			clientDemo.readMessage();
     	}
-		else
-		{
-			printf("connect failure, reconnecting\n");
-			signal = clientDemo.connectServer("127.0.0.1", 12333);
-			sleep(2);
-		}
     }
 
     clientDemo.closeSocket();

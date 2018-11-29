@@ -40,8 +40,32 @@ public:
         return m_socket;
     }
 
-    void transferMessage()
+    void transferMessage(int client_sock)
     {
+		while(true)
+		{
+		printf("client_sock is %d\t", client_sock);
+		char buffer[100];//
+	    int signal = read(client_sock, buffer, sizeof(buffer));
+		if (signal <= 0)
+		{
+			printf("client disconnect.\n");
+			break;
+		}
+
+        MessageBody tmp;
+ 	    memcpy(&tmp, buffer, sizeof(tmp));
+
+		printf("server receive message %s %d %s\n", tmp.destIp, tmp.destPort, tmp.message);
+		}
+        
+//        int destSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+//        struct sockaddr_in destSock_addr;
+//        destSock_addr.sin_family = AF_INET;
+//        destSock_addr.sin_addr.s_addr = inet_addr(tmp.destIp);
+//        destSock_addr.sin_port = htons(tmp.destPort);
+//   	      
+//        write(destSock, &tmp, sizeof(tmp));
     }
 
     void listenClients()
@@ -52,30 +76,17 @@ public:
         int client_sock = accept(m_socket, (struct sockaddr*)&client_addr, &client_addr_size);
         if (client_sock > 0)
         {
-		    printf("client %d connect sucessfully, ip : %s port : %d\n", client_sock, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+		    printf("client %d connect sucessfully, ip : %s port : %d\n", 
+				client_sock, inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-            if (ntohs(client_addr.sin_port) != 12334)
-            {
-                MessageBody tmp;
-                tmp.message = 13149;
-                int destSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-                struct sockaddr_in destSock_addr;
-                destSock_addr.sin_family = AF_INET;
-                destSock_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-                destSock_addr.sin_port = htons(12334);
-                write(destSock, &tmp, sizeof(tmp));
-                return;
-            }
-
-    	    char buffer[40];//
-		    read(client_sock, buffer, sizeof(buffer));
-   		    MessageBody writeMB;
-   		    memcpy(&writeMB, buffer, sizeof(writeMB));
-   		    printf("receive client message: %d\n", writeMB.message);    
-
-		    writeMB.message += 1;
-   		    write(client_sock, &writeMB, sizeof(writeMB));
+		  	std::thread t = std::thread(&ServerSocket::transferMessage, this, client_sock);
+		    t.detach();
         }
+		else
+		{
+			printf("are you connecting again???\n");
+			sleep(2);
+		}
     }
 
 private:
@@ -102,22 +113,23 @@ int main()
     ServerSocket server_socket("127.0.0.1", 12333); 
     
     // while(true)
-    {
-        std::thread serverThreads[2];
-        for (int i = 0; i < 2; ++i)
-        {
-            serverThreads[i] = std::thread(&ServerSocket::listenClients, server_socket);
-        }
+    //{
+    //    std::thread serverThreads[2];
+    //    for (int i = 0; i < 2; ++i)
+    //    {
+    //        serverThreads[i] = std::thread(&ServerSocket::listenClients, server_socket);
+    //    }
 
-        for (int i = 0; i < 2; ++i)
-        {
-            serverThreads[i].detach();
-        }
-    }
+    //    for (int i = 0; i < 2; ++i)
+    //    {
+    //        serverThreads[i].detach();
+    //    }
+    //}
 
     while(true)
     {
         //keep server running
+		server_socket.listenClients();
     }
 
     server_socket.closeSocket();
