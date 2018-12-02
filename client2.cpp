@@ -1,11 +1,10 @@
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <arpa/inet.h>
 #include <sys/socket.h>
-
 #include <thread>
+#include <unistd.h>
 
 #include "structure.h"
 
@@ -15,11 +14,8 @@ class ClinetInterface
 {
 public:
     ClinetInterface(){};
-    ClinetInterface(const string& ip, const int& port)
+    ClinetInterface(const string& ip, const int& port):m_ip(ip),m_port(port)
     {
-        m_ip = ip;
-        m_port = port;
-
         m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         struct sockaddr_in socket_addr;
         memset(&socket_addr, 0, sizeof(socket_addr));
@@ -46,8 +42,8 @@ public:
 
 		MessageBody writeMB;
 		strcpy(writeMB.destIp, "127.0.0.1");
-		writeMB.destPort = 12335;
-		strcpy(writeMB.message, "hello, i am 12334");
+		writeMB.destPort = 12334;
+		strcpy(writeMB.message, "hello, i am 12335");
 
 		printf("xxxxxxxxx%s %d\n", writeMB.destIp, writeMB.destPort);
 
@@ -88,24 +84,7 @@ private:
 
 int main()
 {
-    ClinetInterface clientDemo("127.0.0.1", 12334);
-
-   // std::thread clientThreads[1];
-   // int client_num = 1;
-
-   // string request = "hello, this is client";
-   // for (int i = 0; i < client_num; ++i)
-   // {
-   //     clientThreads[i] = std::thread(&ClinetInterface::writeMessage, clientDemo, request);
-   // }
-
-   // for (int i = 0; i < client_num; ++i)
-   // {
-   //     clientThreads[i].detach();
-   // }
-
-   // std::thread clientThreads2 = thread(&ClinetInterface::readMessage, clientDemo);
-   // clientThreads2.detach();
+    ClinetInterface clientDemo("127.0.0.1", 12335);
 
     int signal = clientDemo.connectServer("127.0.0.1", 12333);
     while(true)
@@ -114,9 +93,7 @@ int main()
     	if (signal == 0)
     	{
         	printf("connect server sucessfully.\n");
-		//	clientDemo.readMessage();
-			clientDemo.writeMessage();
-		//	clientDemo.readMessage();
+			clientDemo.readMessage();
 			sleep(5);
     	}
 		else
