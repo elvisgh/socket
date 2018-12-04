@@ -85,7 +85,6 @@ private:
 int main()
 {
     ClinetInterface clientDemo("127.0.0.1", 12335);
-
     int signal = clientDemo.connectServer("127.0.0.1", 12333);
     while(true)
     {
