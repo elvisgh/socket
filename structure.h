@@ -19,5 +19,5 @@ struct AddressUnit
 
 bool operator<(const AddressUnit& left, const AddressUnit& right)
 {
-    return left.ip < right.ip;
+    return left.ip < right.ip && left.port < right.port;
 }

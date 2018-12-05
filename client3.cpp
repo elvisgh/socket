@@ -43,8 +43,8 @@ public:
 		{
 		MessageBody writeMB;
 		strcpy(writeMB.destIp, "127.0.0.1");
-		writeMB.destPort = 12336;
-		strcpy(writeMB.message, "hello, i am 12335");
+		writeMB.destPort = 12335;
+		strcpy(writeMB.message, "hello, i am 12336");
 
 		printf("xxxxxxxxx%s %d\n", writeMB.destIp, writeMB.destPort);
 
@@ -90,7 +90,7 @@ private:
 
 int main()
 {
-    ClientInterface clientDemo("127.0.0.1", 12334);
+    ClientInterface clientDemo("127.0.0.1", 12336);
 
     int signal = clientDemo.connectServer("127.0.0.1", 12333);
 
