@@ -46,7 +46,7 @@ public:
 		writeMB.destPort = 12336;
 		strcpy(writeMB.message, "hello, i am 12335");
 
-		printf("xxxxxxxxx%s %d\n", writeMB.destIp, writeMB.destPort);
+		printf("send message to %s %d\n", writeMB.destIp, writeMB.destPort);
 
 		char buffer[100];
 		memcpy(buffer, &writeMB, sizeof(writeMB));
@@ -67,12 +67,13 @@ public:
         {
 			MessageBody readMB;
 			memcpy(&readMB, buffer, sizeof(readMB));
-			printf("receive message from server : %s\n", readMB.message);
+			printf("receive message from  server : %s\n", readMB.message);
         }
         else
         {
             //read failure
-            printf("xxxxxxxxxxxxxx\n");
+            printf("server crashed? reconnect...\n");
+            while(connectServer("127.0.0.1", 12333) != 0);
         }
 		}
     }
