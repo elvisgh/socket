@@ -66,14 +66,17 @@ public:
 
     void transferMessage(int client_sock)
     {
+        int signal = 0;
+
 		while(true)
 		{
 		    printf("client_sock is %d\t", client_sock);
-		    char buffer[100];//
-	        int signal = read(client_sock, buffer, sizeof(buffer));
+		    
+            char buffer[100];//
+	        signal = read(client_sock, buffer, sizeof(buffer));
 	    	if (signal <= 0)
 		    {
-			    printf("client disconnect.\n");
+			    printf("no message received, thread shutdown.\n");
 			    break;
 	    	}
 
@@ -87,7 +90,7 @@ public:
             addr.port = tmp.destPort;
 
             int destSock = m_memo.find(addr)->second;
-            write(destSock, &tmp, sizeof(tmp));
+          //  write(destSock, &tmp, sizeof(tmp)); //if clients shutdown, buffers overflow, dump!
 		}
         
     }
@@ -115,11 +118,11 @@ public:
 		  	std::thread t = std::thread(&ServerSocket::transferMessage, this, client_sock);
 		    t.detach();
         }
-		else
-		{
-			printf("are you connecting again???\n");
-			sleep(2);
-		}
+//		else
+//		{
+//			printf("are you connecting again???\n");
+//			sleep(2);
+//		}
     }
 
 private:
