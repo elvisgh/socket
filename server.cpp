@@ -1,11 +1,14 @@
 #include <arpa/inet.h>
 #include <map>
 #include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <string.h>
 #include <string>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <thread>
 #include <unistd.h>
 
@@ -85,12 +88,25 @@ public:
 
 		    printf("server receive message %s %d %s\n", tmp.destIp, tmp.destPort, tmp.message);
             
+
             AddressUnit addr;
             addr.ip = string(tmp.destIp);
             addr.port = tmp.destPort;
 
             int destSock = m_memo.find(addr)->second;
-          //  write(destSock, &tmp, sizeof(tmp)); //if clients shutdown, buffers overflow, dump!
+			
+			struct tcp_info info;
+			int len = sizeof(info);
+			getsockopt(destSock, IPPROTO_TCP, TCP_INFO, &info, (socklen_t*)&len);
+			if (info.tcpi_state == TCP_ESTABLISHED)
+			{
+				write(destSock, &tmp, sizeof(tmp)); //if clients shutdown, buffers overflow, dump!
+			}
+			else
+			{
+				printf("dest sock %d disconnect, can not write message.\n", destSock);
+				m_memo.erase(addr);
+			}
 		}
         
     }
