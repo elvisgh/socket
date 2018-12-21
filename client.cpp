@@ -44,7 +44,7 @@ public:
 		MessageBody writeMB;
 		strcpy(writeMB.destIp, "127.0.0.1");
 		writeMB.destPort = 12336;
-		strcpy(writeMB.message, "hello, i am 12335");
+		strcpy(writeMB.message, "hello, i am 12334");
 
 		printf("send message to %s %d\n", writeMB.destIp, writeMB.destPort);
 

@@ -19,7 +19,7 @@ using namespace std;
 class ServerSocket
 {
 public:
-    ServerSocket(){};
+    ServerSocket() = delete;
     ServerSocket(const string& ip, const int& port):m_ip(ip),m_port(port)
     {
         init();
@@ -93,19 +93,23 @@ public:
             addr.ip = string(tmp.destIp);
             addr.port = tmp.destPort;
 
-            int destSock = m_memo.find(addr)->second;
+			if (m_memo.find(addr) != m_memo.end())
+			{
+            	int destSock = m_memo.find(addr)->second;
+				printf("transfer message to %d \n", destSock);
 			
-			struct tcp_info info;
-			int len = sizeof(info);
-			getsockopt(destSock, IPPROTO_TCP, TCP_INFO, &info, (socklen_t*)&len);
-			if (info.tcpi_state == TCP_ESTABLISHED)
-			{
-				write(destSock, &tmp, sizeof(tmp)); //if clients shutdown, buffers overflow, dump!
-			}
-			else
-			{
-				printf("dest sock %d disconnect, can not write message.\n", destSock);
-				m_memo.erase(addr);
+				struct tcp_info info;
+				int len = sizeof(info);
+				getsockopt(destSock, IPPROTO_TCP, TCP_INFO, &info, (socklen_t*)&len);
+				if (info.tcpi_state == TCP_ESTABLISHED)
+				{
+					write(destSock, &tmp, sizeof(tmp)); //if clients shutdown, buffers overflow, dump!
+				}
+				else
+				{
+					printf("dest sock %d disconnect, can not write message.\n", destSock);
+					m_memo.erase(addr);
+				}
 			}
 		}
         
