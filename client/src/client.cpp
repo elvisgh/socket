@@ -22,7 +22,15 @@ public:
         socket_addr.sin_family = AF_INET;
         socket_addr.sin_addr.s_addr = inet_addr(ip.data());
         socket_addr.sin_port = htons(port);
+        
+        bool l = true;
+        if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&l, sizeof(l)) < 0)
+        {
+            printf("setsockopt error!\n");
+        }
+        
         bind(m_socket, (struct sockaddr*)&socket_addr, sizeof(socket_addr));
+
     }
 
     int connectServer(const string& serverIP, const int& serverPort)
@@ -42,11 +50,16 @@ public:
 		while(true)
 		{
 		MessageBody writeMB;
-		strcpy(writeMB.destIp, "127.0.0.1");
-		writeMB.destPort = 12336;
-		strcpy(writeMB.message, "hello, i am 12334");
+		//strcpy(writeMB.destIp, "127.0.0.1");
+		//writeMB.destPort = 12336;
+		//strcpy(writeMB.message, "hello, i am 12334");
 
-		printf("send message to %s %d\n", writeMB.destIp, writeMB.destPort);
+        writeMB.source = 110;//
+        writeMB.dest = 120;
+        strcpy(writeMB.message, "hello 120, this is 110");
+
+		//printf("send message to %s %d\n", writeMB.destIp, writeMB.destPort);
+		printf("send message to client %d\n", writeMB.dest);
 
 		char buffer[100];
 		memcpy(buffer, &writeMB, sizeof(writeMB));
